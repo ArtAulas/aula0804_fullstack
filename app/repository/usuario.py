@@ -6,7 +6,7 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from fastapi.exceptions import HTTPException
 from fastapi import status
-from schemas.usuario import Usuarios, TokenData
+from schemas.usuario import Usuarios, TokenData, InfoToken
 from db.models import Usuarios as UsuariosModel
 
 crypt_context = CryptContext(schemes=['sha256_crypt'])
@@ -49,6 +49,34 @@ class UsuariosRepository:
         token_data = TokenData(access_token=access_token, expires_at=expires_at)
         return token_data
     
+    def user_login2(self, user: Usuarios, expires_in: int = 30):
+        user_on_db = self._get_user(username=user.username)
+    
+        if user_on_db is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Usuário não existe')
+
+        if not crypt_context.verify(user.password, user_on_db.password):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Senha incorreta')
+        
+        expires_at = datetime.utcnow() + timedelta(expires_in)
+
+        data = {
+            'sub': user_on_db.username,
+            'exp': expires_at
+        }
+
+        access_token = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
+        info_token_data = InfoToken(token_de_acesso=access_token,data_vencimento=expires_at)
+        print("is not None")
+        print("is not None")
+        print("is not None")
+        print("is not None")
+        print("--------Regras-------  ")
+        print("| Apenas 11 Digitos |  ")
+        print("| Apenas -- Numeros |  ")
+        print("|___________________|  ")
+        return info_token_data
+        
     def verify_token(self, token: str):
         try:
             data = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

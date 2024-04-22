@@ -28,8 +28,6 @@ def find_by_name(username: str, db: Session = Depends(get_db_session)):
     return UsuariosResponse.from_orm(usuario)
 from fastapi.security import OAuth2PasswordRequestForm
 
-
-
 @router.post('/login')
 def user_login(
     login_request_form: OAuth2PasswordRequestForm = Depends(),
@@ -45,6 +43,23 @@ def user_login(
     token_data = uc.user_login(user=user, expires_in=60)
 
     return token_data
+
+@router.post('/login2')
+def user_login_2(
+    login_request_form: OAuth2PasswordRequestForm = Depends(),
+    db_session: Session = Depends(get_db_session)
+):
+    uc = UsuariosRepository(db_session=db_session)
+
+    user = Usuarios(
+        username=login_request_form.username,
+        password=login_request_form.password
+    )
+
+    token_data = uc.user_login2(user=user, expires_in=60)
+
+    return token_data
+
 # @router.get("/testar")
 # def validador():
 #     teste = UsuariosRepository.validador()

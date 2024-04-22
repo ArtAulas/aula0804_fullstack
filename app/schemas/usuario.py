@@ -18,3 +18,6 @@ class UsuariosResponse(Usuarios):
         from_attributes=True    
         orm_mode = True
 
+class InfoToken(BaseModel):
+    token_de_acesso:str
+    data_vencimento:datetime
